@@ -108,7 +108,7 @@ export const DebtCard: React.FC<DebtCardProps> = ({
 
   return (
     <div
-      className={`relative bg-white rounded-2xl border transition-all duration-300 shadow-sm hover:shadow-md overflow-hidden ${
+      className={`relative bg-white rounded-2xl border transition-all duration-300 shadow-sm hover:shadow-md ${
         isPendingTransition
           ? 'border-emerald-500 bg-emerald-50/60 ring-2 ring-emerald-500/40 shadow-lg shadow-emerald-500/10'
           : isPaid
@@ -120,7 +120,7 @@ export const DebtCard: React.FC<DebtCardProps> = ({
     >
       {/* Pending Transition Feedback Banner */}
       {isPendingTransition && (
-        <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white text-xs font-bold px-4 py-2 flex items-center justify-between shadow-md">
+        <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white text-xs font-bold px-4 py-2 flex items-center justify-between shadow-md rounded-t-2xl">
           <div className="flex items-center gap-2">
             <span className="relative flex h-3 w-3 shrink-0">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-90"></span>
@@ -139,7 +139,7 @@ export const DebtCard: React.FC<DebtCardProps> = ({
 
       {/* Overdue High-Attention Warning Banner */}
       {overdueInfo?.isOverdue && !isPaid && !isPendingTransition && (
-        <div className="bg-gradient-to-r from-rose-600 via-red-600 to-amber-600 text-white text-xs font-bold px-4 py-2 flex items-center justify-between shadow-md">
+        <div className="bg-gradient-to-r from-rose-600 via-red-600 to-amber-600 text-white text-xs font-bold px-4 py-2 flex items-center justify-between shadow-md rounded-t-2xl">
           <div className="flex items-center gap-2">
             <span className="relative flex h-3 w-3 shrink-0">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-300 opacity-90"></span>
@@ -324,7 +324,7 @@ export const DebtCard: React.FC<DebtCardProps> = ({
 
                   {/* Floating Tooltip / Popover List */}
                   {showUnpaidTooltip && (
-                    <div className="absolute right-0 top-full mt-1.5 z-30 w-72 bg-slate-900 text-white p-3.5 rounded-2xl shadow-2xl border border-slate-700 animate-in fade-in slide-in-from-top-1 duration-200 text-xs font-sans">
+                    <div className="absolute right-0 top-full mt-1.5 z-40 w-72 sm:w-80 bg-slate-900 text-white p-3.5 rounded-2xl shadow-2xl border border-slate-700 animate-in fade-in slide-in-from-top-1 duration-200 text-xs font-sans">
                       <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-800">
                         <div className="flex items-center gap-2 font-extrabold text-slate-100">
                           <Clock className="w-4 h-4 text-amber-400 shrink-0" />

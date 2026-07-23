@@ -11,6 +11,8 @@ interface DebtListProps {
   overdueDebtsMap: Map<string, string>; // debtId -> prevMonthLabel
   unpaidMonthsMap?: Map<string, UnpaidMonthInfo[]>;
   monthNotesMap?: Map<string, string>;
+  activeFilter?: DebtFilter;
+  onFilterChange?: (filter: DebtFilter) => void;
   onTogglePaid: (debtId: string) => void;
   onPayAllUnpaid?: (debtId: string) => void;
   onSaveMonthNote?: (debtId: string, note: string) => void;
@@ -27,6 +29,8 @@ export const DebtList: React.FC<DebtListProps> = ({
   overdueDebtsMap,
   unpaidMonthsMap,
   monthNotesMap,
+  activeFilter,
+  onFilterChange,
   onTogglePaid,
   onPayAllUnpaid,
   onSaveMonthNote,
@@ -37,9 +41,18 @@ export const DebtList: React.FC<DebtListProps> = ({
   onShowToast,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [filter, setFilter] = useState<DebtFilter>('all');
+  const [internalFilter, setInternalFilter] = useState<DebtFilter>('all');
   const [sortBy, setSortBy] = useState<DebtSort>('amount-desc'); // Default sorted highest to lowest amount!
   const [pendingTransitionIds, setPendingTransitionIds] = useState<Set<string>>(new Set());
+
+  const filter = activeFilter !== undefined ? activeFilter : internalFilter;
+
+  const handleSetFilter = (newFilter: DebtFilter) => {
+    setInternalFilter(newFilter);
+    if (onFilterChange) {
+      onFilterChange(newFilter);
+    }
+  };
 
   // Active debts only (excluding archived ones)
   const activeDebts = useMemo(() => debts.filter((d) => !d.isArchived), [debts]);
@@ -144,7 +157,7 @@ export const DebtList: React.FC<DebtListProps> = ({
   }, [activeDebts, searchQuery, filter, sortBy, paidDebtIds, overdueDebtsMap, pendingTransitionIds]);
 
   return (
-    <div className="space-y-4">
+    <div id="debt-list-section" className="space-y-4">
       {/* Search & Filter Toolbar */}
       <div className="bg-white rounded-2xl border border-slate-200 p-3.5 shadow-sm space-y-3">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
@@ -189,7 +202,7 @@ export const DebtList: React.FC<DebtListProps> = ({
         {/* Filter Tabs */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-1 scrollbar-none">
           <button
-            onClick={() => setFilter('all')}
+            onClick={() => handleSetFilter('all')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${
               filter === 'all'
                 ? 'bg-slate-900 text-white shadow-sm'
@@ -203,7 +216,7 @@ export const DebtList: React.FC<DebtListProps> = ({
           </button>
 
           <button
-            onClick={() => setFilter('unpaid')}
+            onClick={() => handleSetFilter('unpaid')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${
               filter === 'unpaid'
                 ? 'bg-amber-600 text-white shadow-sm'
@@ -217,7 +230,7 @@ export const DebtList: React.FC<DebtListProps> = ({
           </button>
 
           <button
-            onClick={() => setFilter('paid')}
+            onClick={() => handleSetFilter('paid')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${
               filter === 'paid'
                 ? 'bg-emerald-600 text-white shadow-sm'
@@ -232,14 +245,14 @@ export const DebtList: React.FC<DebtListProps> = ({
 
           {counts.overdue > 0 && (
             <button
-              onClick={() => setFilter('overdue')}
+              onClick={() => handleSetFilter('overdue')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${
                 filter === 'overdue'
                   ? 'bg-rose-600 text-white shadow-sm animate-pulse'
                   : 'bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200/60'
               }`}
             >
-              <span>معوقات ماه قبل</span>
+              <span>معوقات</span>
               <span className="bg-rose-950/20 text-current px-1.5 py-0.2 rounded-md text-[10px]">
                 {toPersianDigits(counts.overdue)}
               </span>

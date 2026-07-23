@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { AppState, Debt, PaymentLog, UnpaidMonthInfo } from './types';
+import { AppState, Debt, PaymentLog, UnpaidMonthInfo, DebtFilter } from './types';
 import { INITIAL_DEBTS, INITIAL_MONTHS, INITIAL_PAYMENTS } from './data/initialData';
 import {
   getNextMonthRecord,
@@ -72,6 +72,9 @@ export default function App() {
   const [isArchiveModalOpen, setIsArchiveModalOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
+  // Active filter for DebtList (allows external trigger from MonthSummary warning card)
+  const [activeDebtFilter, setActiveDebtFilter] = useState<DebtFilter>('all');
+
   // Semantic Versioning & Changelog Modals state
   const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);
   const [changelogTab, setChangelogTab] = useState<'whats-new' | 'history'>('whats-new');
@@ -133,33 +136,56 @@ export default function App() {
   }, [appState.payments, appState.activeMonthId]);
 
   // Overdue Detection for active month:
-  // Check if debt was active and UNPAID in preceding month
+  // Check if debt was active and UNPAID in ALL preceding months before activeMonth
   const { overdueDebtsMap, overdueDebtsList } = useMemo(() => {
-    const map = new Map<string, string>(); // debtId -> prevMonthLabel
-    const list: { debt: Debt; prevMonthLabel: string }[] = [];
+    const map = new Map<string, string>(); // debtId -> prevMonthLabels
+    const list: {
+      debt: Debt;
+      prevMonthLabel: string;
+      unpaidCount: number;
+      overdueTotal: number;
+    }[] = [];
 
-    const prevMonthId = getPreviousMonthId(activeMonth, appState.months);
-    if (!prevMonthId) return { overdueDebtsMap: map, overdueDebtsList: list };
+    // All months prior to activeMonth
+    const priorMonths = appState.months.filter(
+      (m) => compareMonthIds(m.id, activeMonth.id) < 0
+    );
+    if (priorMonths.length === 0) return { overdueDebtsMap: map, overdueDebtsList: list };
 
-    const prevMonthObj = appState.months.find((m) => m.id === prevMonthId);
-    const prevMonthLabel = prevMonthObj ? prevMonthObj.label : prevMonthId;
-
-    // Check payments in previous month
     activeDebts.forEach((debt) => {
-      // Find if debt was recorded as unpaid in previous month
-      const prevPaymentLog = appState.payments.find(
-        (p) => p.monthId === prevMonthId && p.debtId === debt.id
-      );
+      // Find all unpaid preceding months for this debt
+      const unpaidPriorMonths: MonthRecord[] = [];
+      priorMonths.forEach((m) => {
+        const pLog = appState.payments.find(
+          (p) => p.monthId === m.id && p.debtId === debt.id
+        );
+        if (!pLog || !pLog.paid) {
+          unpaidPriorMonths.push(m);
+        }
+      });
 
-      // If it exists in previous month log and was NOT paid
-      if (prevPaymentLog && !prevPaymentLog.paid) {
-        map.set(debt.id, prevMonthLabel);
-        list.push({ debt, prevMonthLabel });
+      if (unpaidPriorMonths.length > 0) {
+        const labels = unpaidPriorMonths.map((m) => m.label.split(' ')[0]).join('، ');
+        map.set(debt.id, labels);
+        list.push({
+          debt,
+          prevMonthLabel: labels,
+          unpaidCount: unpaidPriorMonths.length,
+          overdueTotal: debt.amount * unpaidPriorMonths.length,
+        });
       }
     });
 
     return { overdueDebtsMap: map, overdueDebtsList: list };
   }, [activeMonth, appState.months, appState.payments, activeDebts]);
+
+  // Action: Filter Overdue Debts & Scroll to List
+  const handleFilterOverdue = () => {
+    setActiveDebtFilter('overdue');
+    setTimeout(() => {
+      document.getElementById('debt-list-section')?.scrollIntoView({ behavior: 'smooth' });
+    }, 50);
+  };
 
   // Map of debtId -> UnpaidMonthInfo[] across all tracked months
   const unpaidMonthsMap = useMemo(() => {
@@ -451,6 +477,8 @@ export default function App() {
           activeDebts={activeDebts}
           paidDebtIds={paidDebtIds}
           overdueDebts={overdueDebtsList}
+          activeFilter={activeDebtFilter}
+          onFilterOverdue={handleFilterOverdue}
         />
 
         {/* Debts Vertical Main List */}
@@ -460,6 +488,8 @@ export default function App() {
           overdueDebtsMap={overdueDebtsMap}
           unpaidMonthsMap={unpaidMonthsMap}
           monthNotesMap={monthNotesMap}
+          activeFilter={activeDebtFilter}
+          onFilterChange={setActiveDebtFilter}
           onTogglePaid={handleTogglePaid}
           onPayAllUnpaid={handlePayAllUnpaid}
           onSaveMonthNote={handleSaveMonthNote}

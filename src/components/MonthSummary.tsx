@@ -1,5 +1,5 @@
 import React from 'react';
-import { MonthRecord, Debt } from '../types';
+import { MonthRecord, Debt, DebtFilter } from '../types';
 import { formatToman, toPersianDigits } from '../utils/persian';
 import { CheckCircle2, Clock, AlertTriangle, ArrowDownRight, Layers } from 'lucide-react';
 
@@ -7,7 +7,8 @@ interface MonthSummaryProps {
   activeMonth: MonthRecord;
   activeDebts: Debt[];
   paidDebtIds: Set<string>;
-  overdueDebts: { debt: Debt; prevMonthLabel: string }[];
+  overdueDebts: { debt: Debt; prevMonthLabel: string; unpaidCount?: number; overdueTotal?: number }[];
+  activeFilter?: DebtFilter;
   onFilterOverdue?: () => void;
 }
 
@@ -16,6 +17,7 @@ export const MonthSummary: React.FC<MonthSummaryProps> = ({
   activeDebts,
   paidDebtIds,
   overdueDebts,
+  activeFilter,
   onFilterOverdue,
 }) => {
   const totalAmount = activeDebts.reduce((sum, debt) => sum + debt.amount, 0);
@@ -30,37 +32,85 @@ export const MonthSummary: React.FC<MonthSummaryProps> = ({
 
   const progressPercent = totalAmount > 0 ? Math.round((paidAmount / totalAmount) * 100) : 0;
 
+  // Calculate total overdue amount across all delayed debts
+  const totalOverdueAmount = overdueDebts.reduce(
+    (sum, item) => sum + (item.overdueTotal ?? item.debt.amount),
+    0
+  );
+
+  const isOverdueTabActive = activeFilter === 'overdue';
+
   return (
     <div className="space-y-4">
-      {/* Overdue Warning Alert Box if any past month debts are unpaid */}
+      {/* Overdue Alert Section */}
       {overdueDebts.length > 0 && (
-        <div
-          onClick={onFilterOverdue}
-          className="cursor-pointer bg-gradient-to-r from-rose-900/90 via-rose-800 to-amber-900/90 text-rose-100 p-4 rounded-2xl border border-rose-600/60 shadow-lg shadow-rose-950/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition-all hover:border-rose-400 group"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center shrink-0 text-rose-300 group-hover:scale-105 transition-transform">
-              <AlertTriangle className="w-5 h-5 animate-pulse" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-sm text-white">
-                  هشدار اقساط معوقه از ماه قبل
-                </span>
-                <span className="bg-rose-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                  {toPersianDigits(overdueDebts.length)} قسط
-                </span>
+        <>
+          {isOverdueTabActive ? (
+            /* FULL DETAILED WARNING CARD (Visible when user is in 'معوقات' view) */
+            <div
+              className="bg-gradient-to-r from-rose-950 via-rose-900 to-amber-950 text-rose-100 p-4 sm:p-5 rounded-2xl border border-rose-700/60 shadow-xl shadow-rose-950/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all relative overflow-hidden"
+            >
+              {/* Subtle background glow */}
+              <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-rose-500/10 rounded-full blur-2xl pointer-events-none" />
+
+              <div className="flex items-start gap-3.5 z-10">
+                <div className="w-11 h-11 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center shrink-0 text-rose-300 mt-0.5">
+                  <AlertTriangle className="w-6 h-6 animate-pulse text-rose-400" />
+                </div>
+                <div className="space-y-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-bold text-sm sm:text-base text-white">
+                      هشدار اقساط معوقه از ماه‌های قبل
+                    </span>
+                    <span className="bg-rose-600 text-white text-xs font-extrabold px-2.5 py-0.5 rounded-full shadow-sm">
+                      {toPersianDigits(overdueDebts.length)} قسط معوقه
+                    </span>
+                  </div>
+                  <p className="text-xs text-rose-200/90 leading-relaxed">
+                    مبلغ کل معوقات پرداخت نشده:{' '}
+                    <strong className="text-white font-bold">{formatToman(totalOverdueAmount)}</strong>
+                  </p>
+                  <div className="text-[11px] text-rose-300/80 flex flex-wrap gap-x-3 gap-y-1 pt-0.5">
+                    <span>
+                      اقساط: {overdueDebts.slice(0, 3).map((d) => d.debt.title).join('، ')}
+                      {overdueDebts.length > 3 ? ' و موارد دیگر' : ''}
+                    </span>
+                  </div>
+                </div>
               </div>
-              <p className="text-xs text-rose-200/90 mt-0.5">
-                قسط‌های زیر در ماه قبل ({overdueDebts[0]?.prevMonthLabel}) پرداخت نشده‌اند. اولویت پرداخت با این اقساط است.
-              </p>
             </div>
-          </div>
-          <button className="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl transition-colors shrink-0 flex items-center gap-1 shadow-sm">
-            <span>مشاهده معوقات</span>
-            <ArrowDownRight className="w-4 h-4" />
-          </button>
-        </div>
+          ) : (
+            /* COMPACT ALERT TRIGGER BUTTON (Visible when user is in other views) */
+            <div className="bg-gradient-to-r from-rose-950/90 via-rose-900/90 to-amber-950/90 text-rose-100 p-3.5 sm:p-4 rounded-2xl border border-rose-700/50 shadow-md flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center shrink-0 text-rose-300">
+                  <AlertTriangle className="w-5 h-5 text-rose-400 animate-pulse" />
+                </div>
+                <div className="truncate">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-xs sm:text-sm text-white">
+                      {toPersianDigits(overdueDebts.length)} قسط معوقه پرداخت‌نشده داری
+                    </span>
+                    <span className="hidden sm:inline-block bg-rose-600/80 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                      {formatToman(totalOverdueAmount)}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-rose-200/80 truncate mt-0.5">
+                    برای مشاهده جزئیات و تسویه اقساط معوقه کلیک کنید
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={onFilterOverdue}
+                className="px-3.5 py-2 bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white text-xs font-bold rounded-xl transition-all shrink-0 flex items-center gap-1.5 shadow-md shadow-rose-950/40 border border-rose-400/30 group hover:scale-[1.02]"
+              >
+                <span>مشاهده و تسویه معوقات</span>
+                <ArrowDownRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       {/* Main Metrics Grid */}
