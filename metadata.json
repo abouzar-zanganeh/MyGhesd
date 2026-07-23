@@ -1,0 +1,6 @@
+{
+  "name": "مدیریت اقساط ماهانه",
+  "description": "اپلیکیشن مدیریت اقساط و بدهی‌های ماهانه با امکان کپی سریع شماره کارت و شبا، پیگیری پرداخت‌ها، هشدار معوقات و بایگانی وام‌های تمام شده",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

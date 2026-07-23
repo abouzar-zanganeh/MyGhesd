@@ -1,0 +1,190 @@
+export type ChangeCategory = 'feat' | 'fix' | 'improvement' | 'ui';
+
+export interface ReleaseChangeItem {
+  type: ChangeCategory;
+  description: string;
+}
+
+export interface ReleaseInfo {
+  version: string;
+  date: string; // Jalali date e.g. "۱۴۰۳/۰۵/۰۲"
+  title: string;
+  summary: string;
+  highlights: string[];
+  changes: ReleaseChangeItem[];
+}
+
+export const CURRENT_VERSION = '1.3.0';
+export const VERSION_STORAGE_KEY = 'INSTALMENT_APP_LAST_SEEN_VERSION';
+
+export const CHANGELOG_RELEASES: ReleaseInfo[] = [
+  {
+    version: '1.3.0',
+    date: '۱۴۰۳/۰۵/۰۲',
+    title: 'انیمیشن و انتقال نرم کارت‌های بدهی هنگام پرداخت',
+    summary: 'بهبود تجربه کاربری دکمه پرداخت با اضافه کردن بنر موفقیت موقت، انیمیشن چک‌مارک و خروج نرم کارت از لیست.',
+    highlights: [
+      'نمایش لحظه‌ای وضعیت پرداخت شد و چک‌مارک پویا قبل از خروج کارت',
+      'مکث کوتاه جهت بازخورد بصری تا کاربر تیک سبز را ببیند',
+      'انیمیشن خروج نرم و روان (Layout Animation) کارت‌ها'
+    ],
+    changes: [
+      {
+        type: 'improvement',
+        description: 'اضافه شدن تاخیر کوتاه و انیمیشن چک‌مارک پویا هنگام پرداخت بدهی',
+      },
+      {
+        type: 'ui',
+        description: 'افزوده شدن بنر وضعیت سبزرنگ در بالای کارت در زمان انتقال به لیست پرداخت‌شده‌ها',
+      },
+      {
+        type: 'improvement',
+        description: 'استفاده از AnimatePresence برای جابه‌جایی و حذف نرم کارت‌ها از صفحه',
+      },
+    ],
+  },
+  {
+    version: '1.2.1',
+    date: '۱۴۰۳/۰۵/۰۲',
+    title: 'بهینه‌سازی رابط کاربری کارت‌های قسط و ساده‌سازی دکمه‌ها',
+    summary: 'حذف اطلاعات تکراری در کارت‌های دارای معوقه و کوتاه کردن عناوین دکمه‌های پرداخت جهت بهبود خوانایی.',
+    highlights: [
+      'حذف متن تکراری مجموع معوقات از بالای کارت‌های قسط',
+      'کوتاه‌سازی عنوان دکمه «پرداخت با معوقات»',
+      'ساده‌سازی متن دکمه «پرداخت شد»'
+    ],
+    changes: [
+      {
+        type: 'ui',
+        description: 'حذف عبارت تکراری نمایش مجموع معوقات در بالای مبلغ کارت قسط',
+      },
+      {
+        type: 'ui',
+        description: 'تغییر عنوان دکمه «پرداخت کامل با معوقات» به «پرداخت با معوقات»',
+      },
+      {
+        type: 'ui',
+        description: 'تغییر عنوان دکمه «پرداخت شد (تیک خورده)» به «پرداخت شد»',
+      }
+    ],
+  },
+  {
+    version: '1.2.0',
+    date: '۱۴۰۳/۰۵/۰۲',
+    title: 'سیستم نسخه هوشمند، «چه خبر؟» و تاریخچه تغییرات',
+    summary: 'یکپارچه‌سازی کامل استاندارد نسخه‌بندی معنایی (Semantic Versioning)، پنجره خودکار اطلاع‌رسانی قابلیت‌های جدید و نمایش تاریخچه کامل بروزرسانی‌ها.',
+    highlights: [
+      'یکپارچه‌سازی نسخه‌بندی معنایی (MAJOR.MINOR.PATCH) در تمامی بخش‌های برنامه‌',
+      'نمایش هوشمند «چه خبر در این نسخه؟» پس از هر بروزرسانی با امکان تایید و مطالعه',
+      'مدال اختصاصی مشاهده تاریخچه کامل نسخه‌ها و تغییرات با نشانگرهای رنگی',
+      'افزودن نشانگر مستقیم نسخه در هدر اصلی با دسترسی سریع به تغییرات'
+    ],
+    changes: [
+      {
+        type: 'feat',
+        description: 'افزودن سیستم هوشمند تشخیص نسخه جدید و نمایش پنجره چیست و چه خبر (What\'s New)',
+      },
+      {
+        type: 'feat',
+        description: 'طراحی پنجره تاریخچه کامل بروزرسانی‌ها همراه با راهنمای جامع Semantic Versioning',
+      },
+      {
+        type: 'ui',
+        description: 'افزودن نشانگر (Badge) نسخه برنامه در هدر اصلی همراه با اعلان تصویری برای نسخه خوانده‌نشده',
+      },
+      {
+        type: 'improvement',
+        description: 'نمایش اطلاعات نسخه و تغییرات در بخش پشتیبان‌گیری و تنظیمات',
+      },
+      {
+        type: 'fix',
+        description: 'بهینه‌سازی تجربه کاربری در باز بستن مدال‌ها و ذخیره‌سازی وضعیت نسخه در مرورگر',
+      }
+    ],
+  },
+  {
+    version: '1.1.0',
+    date: '۱۴۰۳/۰۴/۱۵',
+    title: 'پشتیبان‌گیری کامل اکسل و مدیریت پیشرفته ماه‌ها',
+    summary: 'افزودن امکان دانلود گزارش اکسل (XLSX)، پشتیبان‌گیری چندفرمت و مدیریت اقساط معوقه به همراه یادداشت‌های ماهانه.',
+    highlights: [
+      'خروجی اکسل جالی‌سازی‌شده کامل (XLSX) از تمام ماه‌ها و اقساط',
+      'امکان بازیابی داده‌ها از فایل‌های اکسل، CSV و JSON',
+      'سیستم ثبت یادداشت تخصصی برای هر قسط در ماه جاری',
+      'هشدار معوقات ماه قبل با امکان تسویه یکجای اقساط عقب‌افتاده'
+    ],
+    changes: [
+      {
+        type: 'feat',
+        description: 'افزودن موتور خروجی اکسل پیشرفته با فرمت‌بندی رسمی جدول و محاسبات مجموع',
+      },
+      {
+        type: 'feat',
+        description: 'امکان بازیابی و ترکیب داده‌ها (Merge / Replace) از روی فایل‌های اکسل و JSON',
+      },
+      {
+        type: 'improvement',
+        description: 'امکان ثبت یادداشت مجزا برای هر پرداخت در ماه جاری',
+      },
+      {
+        type: 'ui',
+        description: 'طراحی نوار پیشرفت بصری پرداخت‌ها و کارت‌های اقساط با انیمیشن‌های روان',
+      }
+    ],
+  },
+  {
+    version: '1.0.0',
+    date: '۱۴۰۳/۰۳/۰۱',
+    title: 'نسخه اولیه سامانه مدیریت اقساط و بدهی‌ها',
+    summary: 'انتشار نسخه پایه مدیریت اقساط ماهانه، کپی سریع شماره کارت و شبا، بایگانی وام‌ها و محاسبه درصد پیشرفت.',
+    highlights: [
+      'تعریف اقساط جدید همراه با شماره کارت و شبا با امکان کپی یک‌کلیکی',
+      'جابه‌جایی بین ماه‌های مختلف خورشیدی و شروع دوره ماه جدید',
+      'بخش اقساط تمام‌شده (آرشیو) با امکان بازگردانی یا حذف دائم',
+      'طراحی کاملا واکنش‌گرا و سازگار با گوشی‌های موبایل و تبلت'
+    ],
+    changes: [
+      {
+        type: 'feat',
+        description: 'طراحی سیستم ثبت و ویرایش اقساط ماهانه',
+      },
+      {
+        type: 'feat',
+        description: 'دکمه کپی هوشمند شماره کارت ۱۶ رقمی و شماره شبا',
+      },
+      {
+        type: 'feat',
+        description: 'سیستم ذخیره‌سازی محلی (LocalStorage) بدون نیاز به اینترنت',
+      },
+      {
+        type: 'ui',
+        description: 'رابط کاربری مدرن راست‌چین (RTL) بر پایه Tailwind CSS',
+      }
+    ],
+  },
+];
+
+export function getLatestRelease(): ReleaseInfo {
+  return CHANGELOG_RELEASES[0];
+}
+
+export function getReleaseByVersion(version: string): ReleaseInfo | undefined {
+  return CHANGELOG_RELEASES.find((r) => r.version === version);
+}
+
+export function isNewVersionSeen(versionToCheck = CURRENT_VERSION): boolean {
+  try {
+    const saved = localStorage.getItem(VERSION_STORAGE_KEY);
+    return saved === versionToCheck;
+  } catch {
+    return true;
+  }
+}
+
+export function markVersionAsSeen(versionToMark = CURRENT_VERSION): void {
+  try {
+    localStorage.setItem(VERSION_STORAGE_KEY, versionToMark);
+  } catch {
+    // LocalStorage warning ignored
+  }
+}
